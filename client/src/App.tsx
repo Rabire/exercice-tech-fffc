@@ -1,11 +1,29 @@
-import { Button } from "./components/ui/button";
+import BackgroundDecoration from "./components/background-decoration";
+import UploadZone from "./components/file-upload";
+import ProgressStepper from "./components/progress-stepper";
 
 function App() {
   return (
-    <main>
-      <h1>Hello World</h1>
-      <Button>Click me</Button>
-    </main>
+    <BackgroundDecoration>
+      <main className="relative max-w-screen-xl mx-auto px-6 py-10 space-y-16 flex flex-col items-center">
+        <div className="flex flex-col gap-6 items-center text-center">
+          <h1 className="text-6xl font-bold">
+            Convertisseur de fichiers
+            <br />
+            Fixed-Width vers CSV
+          </h1>
+
+          <p className="text-xl text-muted-foreground">
+            Transformez vos fichiers de données en CSV lisibles et exploitables
+            en quelques clics.
+          </p>
+        </div>
+
+        <ProgressStepper className="max-w-2xl" />
+
+        <UploadZone className="w-full max-w-2xl h-96" />
+      </main>
+    </BackgroundDecoration>
   );
 }
 

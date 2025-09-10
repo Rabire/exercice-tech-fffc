@@ -21,7 +21,7 @@ function App() {
 
         <ProgressStepper className="max-w-2xl" />
 
-        <UploadZone className="w-full max-w-2xl h-96" />
+        <UploadZone />
       </main>
     </BackgroundDecoration>
   );

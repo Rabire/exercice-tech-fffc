@@ -18,6 +18,7 @@ type Type = {
   fileUploadState: [FileUploadState, FileUploadActions];
   isStepLoading: boolean;
   setIsStepLoading: (isLoading: boolean) => void;
+  isValidCombo: boolean;
 };
 
 const defaultValues: Type = {
@@ -26,6 +27,7 @@ const defaultValues: Type = {
   fileUploadState: [{}, {}] as [FileUploadState, FileUploadActions],
   isStepLoading: false,
   setIsStepLoading: () => null,
+  isValidCombo: false,
 };
 
 const ProgressStepperContext = createContext<Type>(defaultValues);
@@ -40,23 +42,23 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
     accept: ".txt,.dat,.csv,.xlsx,", // ends with comma to allow extensionless fixed-width files
   });
 
+  const [{ files }] = fileUploadState;
+
+  const { isValidCombo } = buildUiState(files);
+
   const value: Type = {
     activeStep,
     setActiveStep,
     fileUploadState,
     isStepLoading,
     setIsStepLoading,
+    isValidCombo,
   };
 
   // ↓ None context values below this line (internal logic) ↓
 
-  const [{ files }] = fileUploadState;
-
-  const { isValidCombo } = buildUiState(files);
-
   useEffect(() => {
     if (isValidCombo) {
-      // TODO: start upload
       setIsStepLoading(true);
 
       setTimeout(() => {
@@ -66,6 +68,18 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
       }, 2000);
     }
   }, [isValidCombo]);
+
+  useEffect(() => {
+    // TODO: mocked processing time of data conversion. Replace with actual api call
+    if (activeStep === 1) {
+      setIsStepLoading(true);
+
+      setTimeout(() => {
+        setActiveStep(2);
+        setIsStepLoading(false);
+      }, 3000);
+    }
+  }, [activeStep]);
 
   return (
     <ProgressStepperContext.Provider value={value}>

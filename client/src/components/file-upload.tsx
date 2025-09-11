@@ -10,12 +10,12 @@ import {
   buildAcceptTypes,
   buildInstructionText,
   buildInvalidPairMessage,
-  buildUiState,
 } from "@/lib/messages";
 import FileCard from "./file-card";
 
 export default function UploadZone() {
-  const { fileUploadState } = useProgressStepper();
+  const { fileUploadState, isValidCombo } = useProgressStepper();
+
   const [
     { files, isDragging, errors },
     {
@@ -33,11 +33,6 @@ export default function UploadZone() {
 
   const invalidPairMessage = buildInvalidPairMessage(files);
   const uiError = errors.length > 0 ? errors[0] : invalidPairMessage;
-
-  // const { isValidCombo } = buildUiState(files);
-  // TODO: if isValidCombo go to step 2
-
-  const { isValidCombo } = buildUiState(files);
 
   const inputProps = getInputProps({
     accept: buildAcceptTypes(files),

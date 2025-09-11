@@ -1,5 +1,6 @@
 import { useProgressStepper } from "@/hooks/progress-context";
 import UploadZone from "./file-upload";
+import LoadingConvertStep from "./loading-convert-step";
 import ProgressStepper from "./progress-stepper";
 import { Button } from "./ui/button";
 
@@ -25,7 +26,9 @@ const StepperContent = () => {
           </div>
         </div>
       )}
-      {/* {activeStep === 1 && <ConvertZone />} */}
+
+      {activeStep === 1 && <LoadingConvertStep />}
+
       {/* {activeStep === 2 && <DownloadZone />} */}
     </>
   );

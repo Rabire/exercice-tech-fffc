@@ -7,7 +7,7 @@ function App() {
     <BackgroundDecoration>
       <main className="relative max-w-screen-xl mx-auto px-6 py-10 space-y-16 flex flex-col items-center">
         <div className="flex flex-col gap-6 items-center text-center">
-          <h1 className="text-6xl font-bold">
+          <h1 className="text-6xl font-bold leading-tight">
             Convertisseur de fichiers
             <br />
             Fixed-Width vers CSV

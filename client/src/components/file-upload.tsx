@@ -1,6 +1,5 @@
 import { AlertCircleIcon, FileCogIcon, FileTextIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import {
   buildAcceptTypes,
@@ -21,7 +20,6 @@ export default function UploadZone() {
       handleDrop,
       openFileDialog,
       removeFile,
-      clearFiles,
       getInputProps,
     },
   ] = useFileUpload({
@@ -36,6 +34,7 @@ export default function UploadZone() {
   const uiError = errors.length > 0 ? errors[0] : invalidPairMessage;
 
   const { isValidCombo } = buildUiState(files);
+  // TODO: if isValidCombo go to step 2
 
   const inputProps = getInputProps({
     accept: buildAcceptTypes(files),
@@ -98,24 +97,10 @@ export default function UploadZone() {
 
       {/* File list */}
       {files.length > 0 && (
-        <div className="space-x-2 space-y-2">
+        <div className="space-y-2">
           {files.map((file) => (
             <FileCard key={file.id} file={file} removeFile={removeFile} />
           ))}
-
-          {/* Remove all files button */}
-          {files.length > 1 && (
-            <Button size="sm" variant="outline" onClick={clearFiles}>
-              Remove all files
-            </Button>
-          )}
-
-          {isValidCombo && (
-            <Button size="sm" variant="default">
-              {/* TODO: change this to go to second step */}
-              Continuer
-            </Button>
-          )}
         </div>
       )}
     </div>

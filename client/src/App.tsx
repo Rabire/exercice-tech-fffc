@@ -1,6 +1,6 @@
 import BackgroundDecoration from "./components/background-decoration";
-import UploadZone from "./components/file-upload";
-import ProgressStepper from "./components/progress-stepper";
+import StepperContent from "./components/stepper-content";
+import { ProgressStepperProvider } from "./hooks/progress-context";
 
 function App() {
   return (
@@ -19,9 +19,9 @@ function App() {
           </p>
         </div>
 
-        <ProgressStepper className="max-w-2xl" />
-
-        <UploadZone />
+        <ProgressStepperProvider>
+          <StepperContent />
+        </ProgressStepperProvider>
       </main>
     </BackgroundDecoration>
   );

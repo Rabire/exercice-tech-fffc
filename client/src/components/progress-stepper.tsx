@@ -6,6 +6,7 @@ import {
   StepperTitle,
   StepperTrigger,
 } from "@/components/ui/stepper";
+import { useProgressStepper } from "@/hooks/progress-context";
 
 const steps = [
   {
@@ -27,13 +28,16 @@ type Props = {
 };
 
 export default function ProgressStepper({ className }: Props) {
+  const { activeStep, isStepLoading } = useProgressStepper();
+
   return (
-    <Stepper defaultValue={2} className={className}>
+    <Stepper value={activeStep + 1} className={className}>
       {steps.map(({ step, title }) => (
         <StepperItem
           key={step}
           step={step}
           className="relative flex-1 flex-col!"
+          loading={isStepLoading}
         >
           <StepperTrigger className="flex-col gap-3 rounded">
             <StepperIndicator />

@@ -39,7 +39,7 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
   const fileUploadState = useFileUpload({
     multiple: true,
     maxFiles: 2,
-    accept: ".txt,.dat,.csv,.xlsx,", // ends with comma to allow extensionless fixed-width files
+    accept: ".txt,.dat,.csv,", // ends with comma to allow extensionless fixed-width files
   });
 
   const [{ files }] = fileUploadState;

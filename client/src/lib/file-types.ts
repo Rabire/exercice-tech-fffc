@@ -28,12 +28,5 @@ export const isMetadataFile = (obj: File | FileMetadata): boolean => {
   const type = obj instanceof File ? obj.type : obj.type;
   const name = getLowercaseName(obj);
   const ext = getExtension(name);
-  return (
-    type === "text/csv" ||
-    ext === ".csv" ||
-    // Common XLSX MIME
-    type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-    ext === ".xlsx"
-  );
+  return type === "text/csv" || ext === ".csv";
 };

@@ -27,7 +27,7 @@ export const buildInvalidPairMessage = (
   const { hasData, hasMeta } = buildUiState(files);
 
   if (files.length === 2 && !(hasData && hasMeta))
-    return "Vous devez fournir un fichier Fixed-Width (.txt, .dat ou sans extension) et un fichier de métadonnées (.csv ou .xlsx)";
+    return "Vous devez fournir un fichier Fixed-Width (.txt, .dat ou sans extension) et un fichier de métadonnées (.csv)";
 
   return null;
 };
@@ -44,8 +44,7 @@ export const buildInstructionText = (files: FileWithPreview[]): string => {
   if (files.length === 1) {
     const obj = files[0].file as File | FileMetadata;
 
-    if (isDataFile(obj))
-      return "Ajoutez le fichier de métadonnées (.csv ou .xlsx)";
+    if (isDataFile(obj)) return "Ajoutez le fichier de métadonnées (.csv)";
 
     if (isMetadataFile(obj))
       return "Ajoutez le fichier de données Fixed-Width (.txt, .dat ou sans extension)";
@@ -60,7 +59,7 @@ export const buildInstructionText = (files: FileWithPreview[]): string => {
 export const buildAcceptTypes = (files: FileWithPreview[]): string => {
   const { hasData, hasMeta } = buildUiState(files);
 
-  if (hasData && !hasMeta) return ".csv,.xlsx";
+  if (hasData && !hasMeta) return ".csv";
   if (hasMeta && !hasData) return ".txt,.dat";
   return "*";
 };

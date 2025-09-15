@@ -40,6 +40,9 @@ export function processFixedWidthLine(
     switch (col.type) {
       case "string": {
         value = value.replace(/\s+$/g, "");
+        if (/\r|\n/.test(value)) {
+          throw new Error(`CR/LF not allowed in string column '${col.name}'`);
+        }
         break;
       }
       case "date": {

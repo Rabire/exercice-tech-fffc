@@ -94,7 +94,7 @@ bun run src/cli/index.ts \
 - Sortie vers stdout (redirection):
 
 ```bash
-bun run src/cli/index.ts \
+bun run cli \
   --data ../samples/data_fixed_width.txt \
   --metadata ../samples/metadata.csv > out.csv
 ```

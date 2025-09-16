@@ -1,12 +1,12 @@
-Index,4,numeric
+Index,8,numeric
 Customer Id,16,string
-First Name,11,string
+First Name,12,string
 Last Name,12,string
-Company,32,string
-City,20,string
-Country,45,string
+Company,39,string
+City,25,string
+Country,52,string
 Phone 1,23,string
 Phone 2,23,string
-Email,35,string
-Subscription Date,11,date
-Website,33,string
+Email,45,string
+Subscription Date,18,date
+Website,28,string

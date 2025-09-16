@@ -1,73 +1,83 @@
 import { type Metadata } from "./types.ts";
 
-export interface ConvertFixedWidthToCsvOptions {
-  lineBreak?: "\n" | "\r\n";
-}
-
-export function formatDateToDDMMYYYY(input: string): string {
+function formatDateToDDMMYYYY(input: string): string {
   // input YYYY-MM-DD -> DD/MM/YYYY
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
-  if (!m) {
-    throw new Error(`Invalid date value: ${input}`);
-  }
-  const [, yyyy, mm, dd] = m;
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input.trim());
+
+  if (!match) throw new Error(`Invalid date value: '${input}'`);
+
+  const [, yyyy, mm, dd] = match;
   return `${dd}/${mm}/${yyyy}`;
 }
 
-export function escapeCsv(value: string): string {
-  if (/[",\n\r]/.test(value)) {
-    return '"' + value.replaceAll('"', '""') + '"';
-  }
+function escapeCsv(value: string): string {
+  // Escapes CSV values by wrapping in quotes if they contain special characters and doubling internal quotes
+  if (/[",\n\r]/.test(value)) return '"' + value.replaceAll('"', '""') + '"';
+
   return value;
 }
 
-export function processFixedWidthLine(
-  line: string,
-  metadata: Metadata
-): string[] {
+function processFixedWidthLine(line: string, metadata: Metadata): string[] {
   const cells: string[] = [];
   let offset = 0;
-  for (const col of metadata.columns) {
-    const raw = line.slice(offset, offset + col.length);
-    if (raw.length < col.length) {
+
+  try {
+    for (const col of metadata.columns) {
+      const raw = line.slice(offset, offset + col.length);
+
+      if (raw.length < col.length) {
+        throw new Error(
+          `Data line too short. Expected at least ${
+            offset + col.length
+          } chars, got ${line.length}`
+        );
+      }
+
+      let value = raw;
+
+      switch (col.type) {
+        case "string": {
+          value = value.trimEnd();
+
+          if (value.includes("\n") || value.includes("\r"))
+            throw new Error(`CR/LF not allowed in string column '${col.name}'`);
+
+          break;
+        }
+
+        case "date": {
+          value = value.trim();
+          value = formatDateToDDMMYYYY(value);
+          break;
+        }
+
+        case "numeric": {
+          value = value.trim();
+
+          if (!/^-?\d+(?:\.\d+)?$/.test(value))
+            throw new Error(`Invalid numeric value: ${value}`);
+
+          break;
+        }
+      }
+
+      cells.push(value);
+      offset += col.length;
+    }
+
+    if (line.slice(offset).trim().length > 0) {
+      // extra data after defined columns is considered an error
       throw new Error(
-        `Data line too short. Expected at least ${
-          offset + col.length
-        } chars, got ${line.length}`
+        `Data line longer than expected. Extra content starting at index ${offset}`
       );
     }
-    let value = raw;
-    switch (col.type) {
-      case "string": {
-        value = value.replace(/\s+$/g, "");
-        if (/\r|\n/.test(value)) {
-          throw new Error(`CR/LF not allowed in string column '${col.name}'`);
-        }
-        break;
-      }
-      case "date": {
-        value = value.trim();
-        value = formatDateToDDMMYYYY(value);
-        break;
-      }
-      case "numeric": {
-        value = value.trim();
-        if (!/^-?\d+(?:\.\d+)?$/.test(value)) {
-          throw new Error(`Invalid numeric value: ${value}`);
-        }
-        break;
-      }
-    }
-    cells.push(value);
-    offset += col.length;
+
+    return cells;
+  } catch (error) {
+    console.error(`Error processing line: "${line}"`);
+    throw error;
   }
-  if (line.slice(offset).trim().length > 0) {
-    // extra data after defined columns is considered an error
-    throw new Error(
-      `Data line longer than expected. Extra content starting at index ${offset}`
-    );
-  }
-  return cells;
 }
 
 /**
@@ -80,21 +90,19 @@ export function processFixedWidthLine(
  *
  * @param readable - The input stream containing fixed-width data
  * @param metadata - Column definitions specifying field names, types, and lengths
- * @param opts - Optional configuration for line breaks
  * @yields Uint8Array chunks containing CSV data (header + data rows)
  * @throws Error if data is malformed, truncated, or doesn't match expected format
  */
 export async function* convertFixedWidthStreamToCsv(
   readable: ReadableStream<Uint8Array>,
-  metadata: Metadata,
-  opts?: ConvertFixedWidthToCsvOptions
+  metadata: Metadata
 ): AsyncGenerator<Uint8Array> {
   // Initialize text encoder/decoder for binary stream handling
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
 
-  // Set line break format (default to Windows CRLF)
-  const lb = opts?.lineBreak ?? "\r\n";
+  // Line break format per spec: Windows CRLF
+  const lb = "\r\n";
 
   // Generate and yield CSV header row from column names
   const header = metadata.columns.map((c) => c.name).join(",") + lb;
@@ -115,12 +123,21 @@ export async function* convertFixedWidthStreamToCsv(
 
     // Decode binary chunk to text and append to buffer
     carry += decoder.decode(value, { stream: true });
+    // Remove CR/LF separators so fixed-width slicing stays aligned across records
+    if (carry.includes("\n") || carry.includes("\r")) {
+      carry = carry.replace(/\r?\n/g, "");
+    }
 
     // Process all complete fixed-width records in buffer
     while (carry.length >= expectedLineLen) {
       // Extract one complete record from buffer
       const line = carry.slice(0, expectedLineLen);
       carry = carry.slice(expectedLineLen); // Remove processed data from buffer
+
+      // Consume any accidental CR/LF separators left between records
+      if (carry.length && (carry[0] === "\n" || carry[0] === "\r")) {
+        carry = carry.replace(/^\r?\n+/, "");
+      }
 
       // Parse fixed-width line into individual cell values
       const cells = processFixedWidthLine(line, metadata);
@@ -139,22 +156,6 @@ export async function* convertFixedWidthStreamToCsv(
       `Truncated data: remaining ${carry.length} bytes do not form a complete record of length ${expectedLineLen}`
     );
   }
-}
-
-export function convertFixedWidthIterableToCsv(
-  iterable: Iterable<string> | AsyncIterable<string>,
-  metadata: Metadata,
-  opts?: ConvertFixedWidthToCsvOptions
-): AsyncGenerator<string> {
-  const lb = opts?.lineBreak ?? "\r\n";
-  async function* run() {
-    yield metadata.columns.map((c) => c.name).join(",") + lb;
-    for await (const line of iterable) {
-      const cells = processFixedWidthLine(line, metadata);
-      yield cells.map(escapeCsv).join(",") + lb;
-    }
-  }
-  return run();
 }
 
 // TODO: support custom CSV delimiters and quote policies

@@ -40,9 +40,7 @@ async function main() {
     const metadata = await parseMetadataFromBlob(metaFile);
 
     // Create the conversion generator - this is lazy and won't start processing until consumed
-    const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata, {
-      lineBreak: "\r\n", // Windows-style line breaks for CSV compatibility
-    });
+    const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
 
     // Wrap the async generator in a ReadableStream for easier consumption
     // This pattern allows for backpressure handling and proper resource cleanup

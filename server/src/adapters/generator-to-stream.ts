@@ -3,7 +3,7 @@
  * into a Web ReadableStream so Bun's Response can stream it over HTTP.
  *
  * Context of use (server/src/api/server.ts):
- *   const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata, { lineBreak: "\r\n" });
+ *   const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
  *   const stream = asyncGeneratorToReadableStream(gen);
  *   return new Response(stream, { headers: { "content-type": "text/csv; charset=utf-8" } });
  *

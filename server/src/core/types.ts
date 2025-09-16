@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ColumnTypeSchema = z.enum(["date", "numeric", "string"]);
+const ColumnTypeSchema = z.enum(["date", "numeric", "string"]);
 
 export const MetadataRowSchema = z.tuple([
   z.string().min(1, "column name required"),
@@ -27,12 +27,3 @@ export const MetadataSchema = z.object({
 });
 
 export type Metadata = z.infer<typeof MetadataSchema>;
-
-export interface ConversionOptions {
-  lineSeparator?: "\n" | "\r\n";
-}
-
-export interface ParseStats {
-  rows: number;
-  bytes: number;
-}

@@ -1,4 +1,4 @@
-export interface CliArgs {
+interface CliArgs {
   data?: string;
   metadata?: string;
   output?: string;

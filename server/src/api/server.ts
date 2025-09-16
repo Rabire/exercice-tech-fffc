@@ -1,6 +1,6 @@
+import { asyncGeneratorToReadableStream } from "../adapters/generator-to-stream.ts";
 import { convertFixedWidthStreamToCsv } from "../core/converter.ts";
 import { parseMetadataFromBlob } from "../core/metadata.ts";
-import { asyncGeneratorToReadableStream } from "../adapters/generator-to-stream.ts";
 
 // Simple router using Bun.serve
 export function startServer(port = Number(Bun.env.PORT ?? 3001)) {
@@ -36,11 +36,7 @@ export function startServer(port = Number(Bun.env.PORT ?? 3001)) {
 
           const metadata = await parseMetadataFromBlob(metadataFile);
 
-          const gen = convertFixedWidthStreamToCsv(
-            dataFile.stream(),
-            metadata,
-            { lineBreak: "\r\n" }
-          );
+          const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
 
           const stream = asyncGeneratorToReadableStream(gen);
           return new Response(stream, {

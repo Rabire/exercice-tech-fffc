@@ -29,20 +29,14 @@ function normalizeType(raw: string): ColumnType {
   return mapped;
 }
 
-export interface ParseMetadataOptions {
-  // reserved for future options
-}
-
-export async function parseMetadataFromBlob(
-  blob: Blob,
-  _opts?: ParseMetadataOptions
-): Promise<Metadata> {
+export async function parseMetadataFromBlob(blob: Blob): Promise<Metadata> {
   // Metadata is expected to be small; load fully in memory for simplicity and robustness
   const text = await blob.text();
+
   return parseMetadataFromString(text);
 }
 
-export function parseMetadataFromString(text: string): Metadata {
+function parseMetadataFromString(text: string): Metadata {
   // Remove Byte Order Mark if present
   const clean = text.replace(/^\uFEFF/, "");
 

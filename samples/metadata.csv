@@ -1,6 +1,0 @@
-field_name,width,type,description
-name,10,string,Full name left-aligned and padded to 10 chars
-age,3,number,Zero-padded age (3 chars)
-city,12,string,City name left-aligned and padded to 12 chars
-
-

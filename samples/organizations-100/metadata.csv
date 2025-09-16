@@ -1,0 +1,9 @@
+Index,4,chaîne
+Organization Id,16,chaîne
+Name,32,chaîne
+Website,35,chaîne
+Country,34,chaîne
+Description,58,chaîne
+Founded,5,numeric
+Industry,52,chaîne
+Number of employees,4,numeric

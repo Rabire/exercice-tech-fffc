@@ -4,56 +4,86 @@ import { parseMetadataFromBlob } from "../core/metadata.ts";
 
 const port = Number(Bun.env.PORT ?? 3001);
 
+const corsHeaders = {
+  "access-control-allow-origin": Bun.env.CORS_ORIGIN ?? "*",
+  "access-control-allow-methods": "GET,POST,OPTIONS",
+  "access-control-allow-headers": "content-type,accept",
+  "access-control-expose-headers": "content-disposition",
+} as const;
+
+function json(body: unknown, init?: ResponseInit): Response {
+  return new Response(JSON.stringify(body), {
+    headers: { "content-type": "application/json" },
+    ...init,
+  });
+}
+
+function applyCors(res: Response): Response {
+  const headers = new Headers(res.headers);
+  for (const [key, value] of Object.entries(corsHeaders)) {
+    if (!headers.has(key)) headers.set(key, value);
+  }
+  return new Response(res.body, { status: res.status, headers });
+}
+
+async function handleRequest(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+
+  if (req.method === "OPTIONS") return new Response(null, { status: 204 });
+
+  if (req.method === "GET" && url.pathname === "/health") {
+    return json({ ok: true });
+  }
+
+  if (req.method === "POST" && url.pathname === "/convert") {
+    const contentType = req.headers.get("content-type") || "";
+    if (!contentType.includes("multipart/form-data")) {
+      return json(
+        { error: "invalid_request", message: "Expected multipart/form-data" },
+        { status: 400 }
+      );
+    }
+
+    const form = await req.formData();
+    const dataFile = form.get("data");
+    const metadataFile = form.get("metadata");
+
+    if (!(dataFile instanceof File) || !(metadataFile instanceof File)) {
+      return json(
+        {
+          error: "invalid_request",
+          message: "Fields 'data' and 'metadata' files are required",
+        },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const metadata = await parseMetadataFromBlob(metadataFile);
+      const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
+      const stream = asyncGeneratorToReadableStream(gen);
+      return new Response(stream, {
+        headers: {
+          "content-type": "text/csv; charset=utf-8",
+          "content-disposition": `attachment; filename="output.csv"`,
+          "x-powered-by": "bun",
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return json({ error: "conversion_error", message }, { status: 400 });
+    }
+  }
+
+  return json({ error: "not_found", message: "Not found" }, { status: 404 });
+}
+
 // Simple router using Bun.serve
 const server = Bun.serve({
   port,
   async fetch(req) {
-    const url = new URL(req.url);
-
-    if (req.method === "GET" && url.pathname === "/health") {
-      return new Response(JSON.stringify({ ok: true }), {
-        headers: { "content-type": "application/json" },
-      });
-    }
-
-    if (req.method === "POST" && url.pathname === "/convert") {
-      const contentType = req.headers.get("content-type") || "";
-      if (!contentType.includes("multipart/form-data")) {
-        return new Response("Expected multipart/form-data", { status: 400 });
-      }
-
-      const form = await req.formData();
-      const dataFile = form.get("data");
-      const metadataFile = form.get("metadata");
-
-      if (!(dataFile instanceof File) || !(metadataFile instanceof File)) {
-        return new Response("Fields 'data' and 'metadata' files are required", {
-          status: 400,
-        });
-      }
-
-      try {
-        // Parsing files
-
-        const metadata = await parseMetadataFromBlob(metadataFile);
-
-        const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
-
-        const stream = asyncGeneratorToReadableStream(gen);
-        return new Response(stream, {
-          headers: {
-            "content-type": "text/csv; charset=utf-8",
-            "content-disposition": `attachment; filename="output.csv"`,
-            "x-powered-by": "bun",
-          },
-        });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        return new Response(message, { status: 400 });
-      }
-    }
-
-    return new Response("Not found", { status: 404 });
+    const res = await handleRequest(req);
+    return applyCors(res);
   },
 });
 

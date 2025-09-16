@@ -5,7 +5,10 @@ function formatDateToDDMMYYYY(input: string): string {
 
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input.trim());
 
-  if (!match) throw new Error(`Invalid date value: '${input}'`);
+  if (!match)
+    throw new Error(
+      `[DATE_FORMAT_ERROR] Invalid date format: '${input}'. Expected format: YYYY-MM-DD`
+    );
 
   const [, yyyy, mm, dd] = match;
   return `${dd}/${mm}/${yyyy}`;
@@ -28,9 +31,11 @@ function processFixedWidthLine(line: string, metadata: Metadata): string[] {
 
       if (raw.length < col.length) {
         throw new Error(
-          `Data line too short. Expected at least ${
-            offset + col.length
-          } chars, got ${line.length}`
+          `[LINE_LENGTH_ERROR] Data line too short at column '${
+            col.name
+          }'. Expected at least ${offset + col.length} characters, got ${
+            line.length
+          }`
         );
       }
 
@@ -41,7 +46,13 @@ function processFixedWidthLine(line: string, metadata: Metadata): string[] {
           value = value.trimEnd();
 
           if (value.includes("\n") || value.includes("\r"))
-            throw new Error(`CR/LF not allowed in string column '${col.name}'`);
+            throw new Error(
+              `[STRING_FORMAT_ERROR] Line breaks (CR/LF) are not allowed in string column '${
+                col.name
+              }'. Value: '${value.slice(0, 50)}${
+                value.length > 50 ? "..." : ""
+              }'`
+            );
 
           break;
         }
@@ -56,7 +67,9 @@ function processFixedWidthLine(line: string, metadata: Metadata): string[] {
           value = value.trim();
 
           if (!/^-?\d+(?:\.\d+)?$/.test(value))
-            throw new Error(`Invalid numeric value: ${value}`);
+            throw new Error(
+              `[NUMERIC_FORMAT_ERROR] Invalid numeric value in column '${col.name}': '${value}'. Expected format: integer or decimal number (e.g., 123 or 123.45)`
+            );
 
           break;
         }
@@ -69,7 +82,9 @@ function processFixedWidthLine(line: string, metadata: Metadata): string[] {
     if (line.slice(offset).trim().length > 0) {
       // extra data after defined columns is considered an error
       throw new Error(
-        `Data line longer than expected. Extra content starting at index ${offset}`
+        `[LINE_LENGTH_ERROR] Data line contains unexpected extra content starting at position ${offset}. Extra data: '${line
+          .slice(offset)
+          .slice(0, 20)}${line.slice(offset).length > 20 ? "..." : ""}'`
       );
     }
 
@@ -153,7 +168,12 @@ export async function* convertFixedWidthStreamToCsv(
   // Validate no incomplete data remains after stream ends
   if (carry.trim().length > 0) {
     throw new Error(
-      `Truncated data: remaining ${carry.length} bytes do not form a complete record of length ${expectedLineLen}`
+      `[TRUNCATED_DATA_ERROR] Incomplete data at end of stream: ${
+        carry.length
+      } remaining bytes cannot form a complete record (expected ${expectedLineLen} bytes per record). Remaining data: '${carry.slice(
+        0,
+        50
+      )}${carry.length > 50 ? "..." : ""}'`
     );
   }
 }

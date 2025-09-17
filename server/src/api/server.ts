@@ -44,6 +44,8 @@ async function handleRequest(req: Request): Promise<Response> {
       );
     }
 
+    // Note: req.formData() yields File parts backed by temporary files/streams in Bun,
+    // so large uploads do not need to be fully buffered in memory here.
     const form = await req.formData();
     const dataFile = form.get("data");
     const metadataFile = form.get("metadata");
@@ -62,6 +64,8 @@ async function handleRequest(req: Request): Promise<Response> {
       const metadata = await parseMetadataFromBlob(metadataFile);
       const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
       const stream = asyncGeneratorToReadableStream(gen);
+
+      // Stream the CSV response so memory usage remains constant regardless of input size.
       return new Response(stream, {
         headers: {
           "content-type": "text/csv; charset=utf-8",
@@ -78,9 +82,10 @@ async function handleRequest(req: Request): Promise<Response> {
   return json({ error: "not_found", message: "Not found" }, { status: 404 });
 }
 
-// Simple router using Bun.serve
+// Start HTTP server with explicit body size & timeout to support large uploads
 const server = Bun.serve({
   port,
+  maxRequestBodySize: 2048 * 1024 * 1024, // 2 GiB,
   async fetch(req) {
     const res = await handleRequest(req);
     return applyCors(res);

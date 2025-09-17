@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 import { convertFixedWidthStreamToCsv } from "../core/converter.ts";
-import { parseMetadataFromBlob } from "../core/metadata.ts";
+import { parseMetadataFromBlob } from "../core/metadata";
 import { parseArgs } from "./parse-args.ts";
 
 /**

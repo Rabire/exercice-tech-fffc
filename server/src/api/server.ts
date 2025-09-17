@@ -62,10 +62,39 @@ async function handleRequest(req: Request): Promise<Response> {
 
     try {
       const metadata = await parseMetadataFromBlob(metadataFile);
+
+      /**
+       * TEMPORARY MVP IMPLEMENTATION - NEEDS REFACTORING
+       *
+       * Currently performing two passes over the same file:
+       * 1. Validation pass: consume entire stream to catch errors before sending HTTP headers
+       * 2. Streaming pass: re-process the same data for actual CSV output
+       *
+       * This is inefficient and wasteful as it duplicates the entire conversion process.
+       * The dual-pass approach exists only to ensure error handling occurs before committing
+       * to a streaming response (once headers are sent, we cannot return error JSON).
+       *
+       * FIXME: Refactor to single-pass streaming with proper error boundary handling
+       */
+
+      // Pass 1: drain conversion to capture any processing errors before sending headers
+      try {
+        const validationGen = convertFixedWidthStreamToCsv(
+          dataFile.stream(),
+          metadata
+        );
+        for await (const _ of validationGen) {
+          // discard
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return json({ error: "conversion_error", message }, { status: 400 });
+      }
+
+      // Pass 2: actual streaming response
       const gen = convertFixedWidthStreamToCsv(dataFile.stream(), metadata);
       const stream = asyncGeneratorToReadableStream(gen);
 
-      // Stream the CSV response so memory usage remains constant regardless of input size.
       return new Response(stream, {
         headers: {
           "content-type": "text/csv; charset=utf-8",

@@ -34,4 +34,4 @@ RUN chown -R bun:bun .
 # because we need Railway environment variables
 USER bun
 EXPOSE 3000/tcp
-CMD ["bun", "start"]
+CMD ["bun", "src/api/server.ts"]

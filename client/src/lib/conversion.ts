@@ -2,7 +2,7 @@ import type { FileMetadata, FileWithPreview } from "@/hooks/use-file-upload";
 import { isDataFile, isMetadataFile } from "@/lib/file-types";
 
 // Select the data and meta files from the files array and throw an error if the files are invalid
-export const selectDataAndMeta = (
+const selectDataAndMeta = (
   files: FileWithPreview[]
 ): { data: File; meta: File } => {
   const dataWrapper = files.find((f) =>

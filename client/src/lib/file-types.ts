@@ -2,11 +2,11 @@ import type { FileMetadata } from "@/hooks/use-file-upload";
 
 // TODO: test this
 
-export const getLowercaseName = (file: File | FileMetadata): string => {
+const getLowercaseName = (file: File | FileMetadata): string => {
   return (file instanceof File ? file.name : file.name).toLowerCase();
 };
 
-export const getExtension = (name: string): string => {
+const getExtension = (name: string): string => {
   if (!name.includes(".")) return "";
   return name.substring(name.lastIndexOf("."));
 };

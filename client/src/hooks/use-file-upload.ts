@@ -24,7 +24,7 @@ export type FileWithPreview = {
   preview?: string;
 };
 
-export type FileUploadOptions = {
+type FileUploadOptions = {
   maxFiles?: number; // Only used when multiple is true, defaults to Infinity
   maxSize?: number; // in bytes
   accept?: string;

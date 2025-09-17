@@ -16,9 +16,7 @@ bun install
 ## Démarrer le serveur HTTP
 
 ```bash
-# depuis ce dossier
-bun run start
-# ou en développement (hot reload)
+# en développement (hot reload)
 bun run dev
 ```
 

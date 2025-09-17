@@ -26,7 +26,7 @@ ENV NODE_ENV=production
 # copy production dependencies and source code into final image
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/app/src .
+COPY --from=prerelease /usr/src/app/src ./src
 
 # Fix permissions before switching user
 RUN chown -R bun:bun .
@@ -34,4 +34,4 @@ RUN chown -R bun:bun .
 # because we need Railway environment variables
 USER bun
 EXPOSE 3000/tcp
-CMD ["sh", "-c", "bun run src/api/server.ts"]
+CMD ["bun", "start"]

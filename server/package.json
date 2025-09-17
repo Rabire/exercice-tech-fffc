@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "bun run --hot src/api/server.ts",
-    "start": "bun run src/api/server.ts",
     "cli": "bun run src/cli/index.ts"
   },
   "devDependencies": {

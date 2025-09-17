@@ -24,8 +24,6 @@ export default function UploadZone() {
     },
   ] = fileUploadState;
 
-  // TODO: change style of icons when hover with corresponding file
-
   const invalidPairMessage = buildInvalidPairMessage(files);
   const uiError = errors.length > 0 ? errors[0] : invalidPairMessage;
 

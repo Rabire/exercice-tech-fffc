@@ -76,6 +76,7 @@ function parseMetadataFromString(text: string): Metadata {
   }
 
   const result = MetadataSchema.safeParse({ columns });
+
   if (!result.success) {
     const issue = result.error.issues[0];
     throw new Error(`Invalid metadata: ${issue}`);

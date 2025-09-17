@@ -100,6 +100,5 @@ Note: Use 'bun run cli' instead of the full path for better DX`
 // Execute main function - using top-level await equivalent
 main();
 
-// TODO: Feedback utilisateur pour les gros fichiers qui prennent du temps. Évite l'impression que le programme est planté.
-
+// TODO: Feedback utilisateur pour les gros fichiers qui prennent du temps (progress bar par exemple). Évite l'impression que le programme est planté.
 // TODO: Vérifier que le répertoire de sortie existe et est writable avant de commencer le traitement. Évite d'échouer après avoir traité tout le fichier.

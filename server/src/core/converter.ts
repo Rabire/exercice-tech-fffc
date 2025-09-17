@@ -177,7 +177,3 @@ export async function* convertFixedWidthStreamToCsv(
     );
   }
 }
-
-// TODO: support custom CSV delimiters and quote policies
-// TODO: expose row number in errors for better diagnostics
-// TODO: add backpressure-aware pipeline builder for Bun/FileSystem streams

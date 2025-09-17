@@ -1,5 +1,5 @@
 import { asyncGeneratorToReadableStream } from "../adapters/generator-to-stream.ts";
-import { convertFixedWidthStreamToCsv } from "../core/converter.ts";
+import { convertFixedWidthStreamToCsv } from "../core/converter";
 import { parseMetadataFromBlob } from "../core/metadata";
 
 const port = Number(Bun.env.PORT ?? 3001);

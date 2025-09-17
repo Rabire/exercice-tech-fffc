@@ -34,12 +34,17 @@ export const buildFormData = (files: FileWithPreview[]): FormData => {
   return fd;
 };
 
+const API_URL =
+  import.meta.env.MODE === "production"
+    ? "https://api.ikki.rabire.com"
+    : "http://localhost:3001";
+
 export const convertToCsv = async (
   fd: FormData,
   signal: AbortSignal
 ): Promise<Blob> => {
   // FIXME: use the api base from the environment variable
-  const res = await fetch("http://localhost:3001/convert", {
+  const res = await fetch(`${API_URL}/convert`, {
     method: "POST",
     body: fd,
     signal,

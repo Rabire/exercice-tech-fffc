@@ -1,9 +1,4 @@
-import {
-  AlertCircleIcon,
-  FileCogIcon,
-  FileTextIcon,
-  LoaderCircleIcon,
-} from "lucide-react";
+import { AlertCircleIcon, FileCogIcon, FileTextIcon } from "lucide-react";
 
 import { useProgressStepper } from "@/hooks/progress-context";
 import {
@@ -85,21 +80,6 @@ export default function UploadZone() {
             <p className="text-muted-foreground mb-2 text-xs">
               Déposez vos fichiers ici ou cliquez pour parcourir{" "}
             </p>
-          </div>
-        </div>
-      )}
-
-      {isValidCombo && (
-        <div className="flex flex-col gap-4 rounded-sm border-primary border p-4 bg-accent">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Fichiers acceptés</p>
-
-            <div className="flex items-center gap-2">
-              <LoaderCircleIcon className="size-4 animate-spin" />
-              <span className="text-xs text-muted-foreground">
-                Téléversement en cours...
-              </span>
-            </div>
           </div>
         </div>
       )}

@@ -1,13 +1,20 @@
+import { useProgressStepper } from "@/hooks/progress-context";
 import {
+  AlertTriangleIcon,
   ArrowRightIcon,
+  BugIcon,
   CheckCircleIcon,
   CogIcon,
   DatabaseIcon,
   FileTextIcon,
   LoaderCircleIcon,
+  XCircleIcon,
 } from "lucide-react";
+import { Button } from "./ui/button";
 
 const LoadingConvertStep = () => {
+  const { error, reset } = useProgressStepper();
+
   return (
     <div className="max-w-2xl w-full space-y-6">
       {/* Header */}
@@ -34,9 +41,17 @@ const LoadingConvertStep = () => {
 
           <div className="flex items-center space-x-2 px-4">
             <ArrowRightIcon className="size-4 text-muted-foreground" />
-            <div className="bg-primary p-2 rounded-full animate-pulse">
-              <CogIcon className="size-4 text-primary-foreground animate-spin" />
-            </div>
+            {!error && (
+              <div className="bg-primary p-2 rounded-full animate-pulse">
+                <CogIcon className="size-4 text-primary-foreground animate-spin" />
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-destructive p-2 rounded-full">
+                <BugIcon className="size-4 text-destructive-foreground" />
+              </div>
+            )}
             <ArrowRightIcon className="size-4 text-muted-foreground" />
           </div>
 
@@ -52,37 +67,69 @@ const LoadingConvertStep = () => {
         </div>
 
         {/* Progress Steps */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-accent/50 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <CheckCircleIcon className="size-5 text-primary" />
-              <span className="text-sm font-medium">
-                Analyse du fichier source
-              </span>
+        {!error && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-accent/50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <CheckCircleIcon className="size-5 text-primary" />
+                <span className="text-sm font-medium">
+                  Analyse du fichier source
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">Terminé</span>
             </div>
-            <span className="text-xs text-muted-foreground">Terminé</span>
-          </div>
 
-          <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
-            <div className="flex items-center space-x-3">
-              <LoaderCircleIcon className="size-5 text-primary animate-spin" />
-              <span className="text-sm font-medium">
-                Conversion des données
-              </span>
+            <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/20">
+              <div className="flex items-center space-x-3">
+                <LoaderCircleIcon className="size-5 text-primary animate-spin" />
+                <span className="text-sm font-medium">
+                  Conversion des données
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">En cours...</span>
             </div>
-            <span className="text-xs text-muted-foreground">En cours...</span>
-          </div>
 
-          <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg opacity-60">
-            <div className="flex items-center space-x-3">
-              <div className="size-5 rounded-full border-2 border-muted-foreground/30" />
-              <span className="text-sm font-medium">
-                Validation et finalisation
-              </span>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg opacity-60">
+              <div className="flex items-center space-x-3">
+                <div className="size-5 rounded-full border-2 border-muted-foreground/30" />
+                <span className="text-sm font-medium">
+                  Validation et finalisation
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground">En attente</span>
             </div>
-            <span className="text-xs text-muted-foreground">En attente</span>
           </div>
-        </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-4">
+            <div className="flex items-center space-x-3">
+              <XCircleIcon className="size-5 text-destructive flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-destructive">
+                  Erreur de conversion
+                </h3>
+                <pre className="text-xs text-destructive/80 mt-1 whitespace-pre-line">
+                  {error}
+                </pre>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center space-x-2 pt-2">
+              <AlertTriangleIcon className="size-4 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
+                Vérifiez les formats de vos fichiers et réessayez
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Button onClick={reset} variant="outline" size="sm">
+                Recommencer
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

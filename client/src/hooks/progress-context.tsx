@@ -81,11 +81,15 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
     controllerRef.current = controller;
 
     try {
-      // Execute conversion via API call
-      const blob = await convertToCsv(formData, controller.signal);
+      // Execute conversion via API call with minimum 2 second duration
+      const [blob] = await Promise.all([
+        convertToCsv(formData, controller.signal),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
 
       // Create downloadable URL and transition to success state
       const url = URL.createObjectURL(blob);
+
       setDownloadUrl(url);
       setActiveStep(2);
     } catch (err) {
@@ -95,7 +99,6 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
       // Only handle actual errors, ignore user cancellations
       if (e.name !== "AbortError") {
         setError(e.message);
-        setActiveStep(0); // Reset to upload step
       }
     } finally {
       // Always cleanup loading state and controller reference
@@ -126,17 +129,16 @@ const ProgressStepperProvider = ({ children }: PropsWithChildren) => {
 
     // Auto-start conversion when valid files are uploaded
     if (isValidCombo) void startConversion();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature]);
 
+  // reset download url when component unmounts
   useEffect(() => {
     return () => {
       if (controllerRef.current) controllerRef.current.abort();
 
       resetDownload();
     };
-  }, [resetDownload]);
+  }, [controllerRef]);
 
   const reset = () => {
     setActiveStep(0);

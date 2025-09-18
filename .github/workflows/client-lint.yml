@@ -1,13 +1,8 @@
 name: client-lint
 
 on:
-  push:
-    branches: ["**"]
-    paths:
-      - "client/**"
-      - ".github/workflows/client-lint.yml"
   pull_request:
-    branches: ["**"]
+    types: [opened, synchronize, reopened]
     paths:
       - "client/**"
       - ".github/workflows/client-lint.yml"

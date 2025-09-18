@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "bun run --hot src/api/server.ts",
-    "cli": "bun run src/cli/index.ts"
+    "cli": "bun run src/cli/index.ts",
+    "test": "bun test",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@types/bun": "latest"

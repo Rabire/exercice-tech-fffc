@@ -59,6 +59,28 @@ export async function* convertFixedWidthStreamToCsv(
     }
   }
 
+  // Flush any buffered decoder state (e.g., if a multi-byte char spanned chunks)
+  carry += decoder.decode();
+
+  // Remove any stray CR/LF that may remain after final decode
+  if (carry.includes("\n") || carry.includes("\r")) {
+    carry = carry.replace(/\r?\n/g, "");
+  }
+
+  // Process any remaining complete records after the final decoder flush
+  while (carry.length >= expectedLineLen) {
+    const line = carry.slice(0, expectedLineLen);
+    carry = carry.slice(expectedLineLen);
+
+    if (carry.length && (carry[0] === "\n" || carry[0] === "\r")) {
+      carry = carry.replace(/^\r?\n+/, "");
+    }
+
+    const cells = processFixedWidthLine(line, metadata);
+    const escaped = cells.map(escapeCsv).join(",") + lb;
+    yield encoder.encode(escaped);
+  }
+
   // Validate no incomplete data remains after stream ends
   if (carry.trim().length > 0) {
     throw new Error(

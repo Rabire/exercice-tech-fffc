@@ -5,7 +5,7 @@ import { parseMetadataFromBlob } from "../core/metadata";
 const port = Number(Bun.env.PORT ?? 3001);
 
 const corsHeaders = {
-  "access-control-allow-origin": Bun.env.CORS_ORIGIN ?? "*",
+  "access-control-allow-origin": "https://ikki.rabire.com",
   "access-control-allow-methods": "GET,POST,OPTIONS",
   "access-control-allow-headers": "content-type,accept",
   "access-control-expose-headers": "content-disposition",

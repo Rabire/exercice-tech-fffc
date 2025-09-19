@@ -1,5 +1,6 @@
 import { type Metadata } from "../types.ts";
 import { escapeCsv } from "./escape-csv.ts";
+import { formatBytes } from "./format-bytes";
 import { processFixedWidthLine } from "./process-fixed-width-line.ts";
 
 export async function* convertFixedWidthStreamToCsv(
@@ -9,6 +10,14 @@ export async function* convertFixedWidthStreamToCsv(
   // Initialize text encoder/decoder for binary stream handling
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
+
+  // Performance tracking
+  const startedAtMs =
+    typeof performance !== "undefined" && typeof performance.now === "function"
+      ? performance.now()
+      : Date.now();
+  let totalBytesRead = 0;
+  let totalLinesProcessed = 0;
 
   // Line break format per spec: Windows CRLF
   const lb = "\r\n";
@@ -29,6 +38,9 @@ export async function* convertFixedWidthStreamToCsv(
     // Read next chunk from stream
     const { done, value } = await reader.read();
     if (done) break; // End of stream reached
+
+    // Count bytes for performance stats
+    if (value) totalBytesRead += value.byteLength ?? value.length;
 
     // Decode binary chunk to text and append to buffer
     carry += decoder.decode(value, { stream: true });
@@ -56,6 +68,9 @@ export async function* convertFixedWidthStreamToCsv(
 
       // Yield encoded CSV row as binary chunk
       yield encoder.encode(escaped);
+
+      // Count processed lines
+      totalLinesProcessed += 1;
     }
   }
 
@@ -70,4 +85,17 @@ export async function* convertFixedWidthStreamToCsv(
       )}${carry.length > 50 ? "..." : ""}'`
     );
   }
+
+  // Emit performance summary
+  const endedAtMs =
+    typeof performance !== "undefined" && typeof performance.now === "function"
+      ? performance.now()
+      : Date.now();
+  const elapsedSeconds = ((endedAtMs - startedAtMs) / 1000).toFixed(3);
+  // Using English labels in logs for clarity across environments
+  console.info(
+    `[PERF] Processed ${totalLinesProcessed.toLocaleString()} lines from ${formatBytes(
+      totalBytesRead
+    )} in ${elapsedSeconds}s`
+  );
 }
